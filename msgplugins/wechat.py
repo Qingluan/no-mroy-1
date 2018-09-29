@@ -11,6 +11,14 @@ from argparse import ArgumentParser
 
 MSG_DB = os.path.expanduser("~/.qqbot-tmp/msg-db.sql")
 
+class Config_tmp_db:
+    _data = {}
+
+    def set(self, a,b):
+        Config_tmp_db._data[a] = b
+    def get(self):
+        return Config_tmp_db._data
+
 @itchat.msg_register(itchat.content.TEXT, isGroupChat=False)
 def search(msg):
     # if msg.FromUserName == 'fil'
@@ -23,6 +31,27 @@ def search(msg):
             'setting': json.dumps(d)
         }).json()
         itchat.send(res['res'], toUserName='filehelper')
+    elif msg.text.startswith("#conf"):
+        o = msg.text.split("#conf")[1]
+        try:
+            res = o.split()
+            if len(res) == 3:
+                qq, mail, code = res
+                config_qq(qq, mail, code)
+        except Exception as e:
+            itchat.send('Error: ' + str(e), toUserName='filehelper')
+        else:
+            itchat.send('Config: add new qq account to see' , toUserName='filehelper')
+
+    elif msg.text.startswith("#login"):
+        qq = msg.text.split("#login")[1].strip()
+        try:
+            res = os.popen("qqbot -u %s" % qq).read()
+        except Exception as e:
+            itchat.send('Error: ' + str(e), toUserName='filehelper')
+        else:
+            itchat.send('Login: successful login %s ' % qq , toUserName='filehelper')
+
     else:
         res = requests.post("http://localhost:14144/search", data={
             'key': msg.text
@@ -48,6 +77,30 @@ class Loginer:
     def __del__(self):
         itchat.logout()
 
+
+def config_qq(login_qq, mail_to_login, mail_code):
+    s = {
+        "termServerPort" : 8188,
+        "httpServerIP" : "",
+        "httpServerPort" : 8189,
+        "qq" : login_qq,
+        "mailAccount" : mail_to_login,
+        "mailAuthCode" : mail_code,
+        "cmdQrcode" : False,
+        "debug" : False,
+        "restartOnOffline" : True,
+        "daemon": True,
+        "startAfterFetch" : False,
+        "pluginPath" : ".",
+        "plugins" : ['msgplugins.sendcode',],
+        "pluginsConf" : {},
+    }
+    
+    with open(os.path.expanduser("~/.qqbot-tmp/v2.3.conf"), 'r') as fpr:
+        d = json.load(fpr)
+        d[login_qq] = s
+        with open(os.path.expanduser("~/.qqbot-tmp/v2.3.conf"), 'w') as fpw:
+            json.dump(d, fpw)
 
 def StartWeRobot():
     parser = ArgumentParser()

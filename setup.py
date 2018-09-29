@@ -4,7 +4,7 @@ import os, sys
 import time
 
 setup(name='no-mroy-1',
-    version='0.0.3',
+    version='0.0.4',
     description='a msg plugins',
     url='https://github.com/Qingluan/no-mroy-1.git',
     author='Qing luan',
@@ -12,7 +12,7 @@ setup(name='no-mroy-1',
     include_package_data=True,
     zip_safe=False,
     packages=find_packages(),
-    install_requires=[ 'mroylib-min','tornado', 'qtornado','qqbot'],
+    install_requires=[ 'mroylib-min','tornado', 'qtornado','qqbot', 'itchat'],
     entry_points={
         'console_scripts': [
             'Qserver=Reserver.main:main',
